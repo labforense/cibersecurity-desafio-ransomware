@@ -1,27 +1,26 @@
-import os
+from pathlib import Path
 import pyaes
 
-# Arquivo criptografado
-file_name = "teste.txt.testeransomware"
+BASE_DIR = Path(__file__).resolve().parent
+LAB_DIR = BASE_DIR / "lab_data"
+ENCRYPTED_FILE = LAB_DIR / "exemplo.txt.testeransomware"
+RECOVERED_FILE = LAB_DIR / "exemplo.recuperado.txt"
+KEY = b"testeransomwares"
 
-# Abrir o arquivo
-file = open(file_name, "rb")
-file_data = file.read()
-file.close()
 
-# Mesma chave de 16 bytes
-key = b"testeransomwares"
-aes = pyaes.AESModeOfOperationCTR(key)
+def main():
+    if not ENCRYPTED_FILE.is_file():
+        raise FileNotFoundError(f"Arquivo cifrado não encontrado: {ENCRYPTED_FILE}")
 
-# Descriptografar
-decrypt_data = aes.decrypt(file_data)
+    encrypted_data = ENCRYPTED_FILE.read_bytes()
+    aes = pyaes.AESModeOfOperationCTR(KEY)
+    recovered_data = aes.decrypt(encrypted_data)
+    RECOVERED_FILE.write_bytes(recovered_data)
 
-# Remover o arquivo criptografado
-os.remove(file_name)
+    print("Recuperação concluída.")
+    print(f"Arquivo recuperado criado: {RECOVERED_FILE.name}")
+    print("O arquivo cifrado foi preservado como evidência de laboratório.")
 
-# Criar o arquivo original novamente
-with open("teste.txt", "wb") as f:
-      f.write(decrypt_data)
 
-print("Arquivo descriptografado com sucesso!")
-
+if __name__ == "__main__":
+    main()
